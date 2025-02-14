@@ -90,7 +90,7 @@ base = {
 
         ## training
         'n_steps_per_epoch': 10000,
-        'loss_type': 'value_l2',
+        'loss_type': 'BinaryCrossEntropyLoss',
         'n_train_steps': 200e3,
         'batch_size': 32,
         'learning_rate': 2e-4,

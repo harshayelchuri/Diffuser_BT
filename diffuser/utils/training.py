@@ -133,6 +133,44 @@ class Trainer(object):
 
             self.step += 1
 
+
+    def train_bt(self, n_train_steps):
+
+        timer = Timer()
+        for step in range(n_train_steps):
+            for i in range(self.gradient_accumulate_every):
+                batch1, batch2 = next(self.dataloader)
+                batch1 = batch_to_device(batch1)
+                batch2 = batch_to_device(batch2)
+                
+                ## TODO: divide the batch into two halves and pass them to the model 
+                loss, infos = self.model.loss(*batch)
+                loss = loss / self.gradient_accumulate_every
+                loss.backward()
+
+            self.optimizer.step()
+            self.optimizer.zero_grad()
+
+            if self.step % self.update_ema_every == 0:
+                self.step_ema()
+
+            if self.step % self.save_freq == 0:
+                label = self.step // self.label_freq * self.label_freq
+                self.save(label)
+
+            if self.step % self.log_freq == 0:
+                infos_str = ' | '.join([f'{key}: {val:8.4f}' for key, val in infos.items()])
+                print(f'{self.step}: {loss:8.4f} | {infos_str} | t: {timer():8.4f}', flush=True)
+
+            if self.step == 0 and self.sample_freq:
+                self.render_reference(self.n_reference)
+
+            if self.sample_freq and self.step % self.sample_freq == 0:
+                self.render_samples()
+
+            self.step += 1
+
+
     def save(self, epoch):
         '''
             saves model and ema to disk;

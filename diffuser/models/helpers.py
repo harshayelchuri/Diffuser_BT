@@ -210,9 +210,15 @@ class ValueL2(ValueLoss):
     def _loss(self, pred, targ):
         return F.mse_loss(pred, targ, reduction='none')
 
+class BinaryCrossEntropyLoss(ValueLoss):
+
+    def _loss(self, pred, targ):
+        return F.binary_cross_entropy(pred, targ)
+
 Losses = {
     'l1': WeightedL1,
     'l2': WeightedL2,
     'value_l1': ValueL1,
     'value_l2': ValueL2,
+    'BinaryCrossEntropyLoss': BinaryCrossEntropyLoss,
 }
